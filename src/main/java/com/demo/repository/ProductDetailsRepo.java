@@ -12,4 +12,7 @@ public interface ProductDetailsRepo extends JpaRepository<ProductDetails, String
 
 	@Query(value = "select * from nintriva.product p where p.product_name like %:search%", nativeQuery = true)
 	 List<ProductDetails> findByKeyword(@Param("search") String search);
+	
+	@Query(value = "select * from nintriva.product p where id=?1", nativeQuery = true)
+	 ProductDetails findById(@Param("id") int id);
 }

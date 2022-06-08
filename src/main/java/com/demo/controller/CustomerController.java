@@ -1,6 +1,7 @@
 package com.demo.controller;
 
 import java.util.ArrayList;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -17,13 +18,17 @@ import org.json.simple.JSONObject;
 
 import com.demo.model.CustomerDetails;
 import com.demo.model.ProductDetails;
-import com.demo.service.DemoService;
+import com.demo.service.AuthenticationService;
+import com.demo.service.ProductService;
 
 @RestController
 public class CustomerController {
 
 	@Autowired
-	DemoService service;
+	ProductService productservice;
+	
+	@Autowired
+	AuthenticationService authservice;
 	
 	Logger logger = LoggerFactory.getLogger(CustomerController.class);
 	
@@ -36,10 +41,10 @@ public class CustomerController {
 		try {
 			logger.info("\n*****Calling User registering API*****");
 			response.keySet().clear(); //clearing response object
-			List<CustomerDetails> users = service.findUsersByemail(user.getEmail());
+			CustomerDetails users = authservice.findUsersByemail(user.getEmail());
 			logger.debug("existing users--->"+users);
-			if(users.size()==0) {
-				service.saveCustomer(user);
+			if(users==null) {
+				authservice.saveCustomer(user);
 				response.put("response", "User registered Successfully");
 				response.put("Data", user);
 				logger.info(user.getName()+" User registered Successfully");
@@ -62,18 +67,15 @@ public class CustomerController {
     public ResponseEntity<JSONObject> loginUser(@RequestBody CustomerDetails user) {
 		try {
 			response.keySet().clear(); //clearing response object
-	        List<CustomerDetails> users = service.findAllCustomer();
+	        CustomerDetails users = authservice.findUsersByemail(user.getEmail());
 	        logger.info("\n********User Login API calling*******");
-	        for (CustomerDetails other : users) {
-	            if ((other.getEmail().equals(user.getEmail()))&&
-	            		(other.getPassword().equals(user.getPassword()))) {
-	            		logger.info("Login successfully for user "+other.getName());
-	            		other.setStatus("active");
-	            		response.put("Status", "success");
-	            		response.put("Data", other);
-	            		return new ResponseEntity<JSONObject>(response, HttpStatus.OK);
-	            }
-	        }
+		    if (users.getPassword().equals(user.getPassword())) {
+		            		logger.info("Login successfully for user "+user.getName());
+		            		user.setStatus("active");
+		            		response.put("Status", "success");
+		            		response.put("Data", user);
+		            		return new ResponseEntity<JSONObject>(response, HttpStatus.OK);
+		            }
 	        response.put("Status", "failed");
 			response.put("Data", user);
 	        return new ResponseEntity<JSONObject>(response, HttpStatus.UNAUTHORIZED);
@@ -117,7 +119,7 @@ public class CustomerController {
 		try {
 			response.keySet().clear();
 			logger.info("Fetching all customers information");
-			data = service.findAllCustomer();
+			data = authservice.findAllCustomer();
 			logger.debug("data"+data);
 			return new ResponseEntity<List<CustomerDetails>>(data, HttpStatus.OK);
 		}
@@ -133,7 +135,7 @@ public class CustomerController {
 		List<ProductDetails> data = new ArrayList<>();
 		try {
 			logger.info("Fetching all prodcts information");
-			data=service.findByKeyword(search);
+			data=productservice.findByKeyword(search);
 			return new ResponseEntity<List<ProductDetails>>(data, HttpStatus.OK);
 		}
 		catch(Exception ex) {

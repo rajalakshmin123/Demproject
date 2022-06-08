@@ -15,7 +15,7 @@ public interface CustomerDetailsRepo extends JpaRepository<CustomerDetails, Stri
 	
 	@Query(value = "SELECT * FROM nintriva.customer u WHERE u.email =?1",
 			  nativeQuery = true)
-	List<CustomerDetails> findUsersByemail(@Param("email") String usertype);
+	CustomerDetails findUsersByemail(@Param("email") String usertype);
 
 
 	//@Query(value="select password from nintriva.customer where")

@@ -15,5 +15,5 @@ public interface RetailerDetailsRepo extends JpaRepository<RetailerDetails, Stri
 	
 	@Query(value = "SELECT * FROM nintriva.retailer u WHERE u.email =?1",
 			  nativeQuery = true)
-	List<RetailerDetails> findRetailersByemail(@Param("email") String email);
+	RetailerDetails findRetailersByemail(@Param("email") String email);
 }

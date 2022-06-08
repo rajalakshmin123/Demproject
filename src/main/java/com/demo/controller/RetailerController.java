@@ -16,13 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 import com.demo.model.CustomerDetails;
 import com.demo.model.ProductDetails;
 import com.demo.model.RetailerDetails;
-import com.demo.service.DemoService;
+import com.demo.service.AuthenticationService;
+import com.demo.service.ProductService;
 
 @RestController
 public class RetailerController {
 
 	@Autowired
-	DemoService service;
+	ProductService productservice;
+	
+	@Autowired
+	AuthenticationService authservice;
 	
 	Logger logger = LoggerFactory.getLogger(RetailerController.class);
 	
@@ -35,10 +39,10 @@ public class RetailerController {
 		try {
 			logger.info("\n*****Calling retailer registering API*****");
 			response.keySet().clear(); //clearing response object
-			List<RetailerDetails> users = service.findRetailersByemail(retailer.getEmail());
+			RetailerDetails users = authservice.findRetailersByemail(retailer.getEmail());
 			logger.debug("existing retailer--->"+users);
-			if(users.size()==0) {
-				service.saveRetailer(retailer);
+			if(users!=null) {
+				authservice.saveRetailer(retailer);
 				response.put("response", "Retailer registered Successfully");
 				response.put("Data", retailer);
 				logger.info(retailer.getName()+" Retailer registered Successfully");
@@ -61,7 +65,7 @@ public class RetailerController {
     public ResponseEntity<JSONObject> loginRetailer(@RequestBody RetailerDetails retailer) {
 		try {
 			response.keySet().clear(); //clearing response object
-	        List<RetailerDetails> retailers = service.findAllRetailer();
+	        List<RetailerDetails> retailers = authservice.findAllRetailer();
 	        logger.info("\n********Retailer Login API calling*******");
 	        for (RetailerDetails other : retailers) {
 	            if ((other.getEmail().equals(retailer.getEmail()))&&
@@ -116,8 +120,8 @@ public class RetailerController {
 			logger.info("\n*****Calling API for adding product*****");
 			response.keySet().clear(); //clearing response object
 			if(product!=null) {
-				service.saveProducts(product);
-				response.put("response", "Retailer registered Successfully");
+				productservice.saveProducts(product);
+				response.put("response", "Product added Successfully");
 				response.put("Data", product);
 				logger.info(product.getProduct_name()+" added Successfully");
 				return new ResponseEntity<JSONObject>(response, HttpStatus.OK);
